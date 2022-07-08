@@ -1,6 +1,4 @@
-import logo from "./logo.svg";
 import "./App.css";
-
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -11,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import dateFormat from "dateformat";
 
 function App() {
   const [chartData, setChartData] = useState({
@@ -24,15 +23,14 @@ function App() {
       client.send("hello from client");
     };
     client.onmessage = (msg) => {
-      console.log("src/App.js", "receive data ", msg.data);
       const data = msg.data;
       const obj = JSON.parse(data);
       if (obj.type && obj.type === "init") {
-        console.log("src/App.js", "init", obj.stock.length);
         const len = obj.stock.length;
+        console.log('lenth', len)
         const record90 = obj.stock.slice(len - 40, len);
         const validData = record90.map((v) => ({
-          datetime: v.datetime,
+          datetime: formartTime(v.datetime),
           price: v.close,
         }));
 
@@ -49,7 +47,7 @@ function App() {
         const len = obj.stock.length;
         const record90 = obj.stock.slice(len - 40, len);
         const validData = record90.map((v) => ({
-          datetime: v.datetime,
+          datetime: formartTime(v.datetime),
           price: v.close,
         }));
 
@@ -69,6 +67,10 @@ function App() {
   const percent =
     (chartData.stock.length - 1) *
     (100 / (chartData.predict.length + chartData.stock.length - 1));
+
+  const formartTime = (dateTime) => {
+    return dateFormat(new Date(dateTime), 'mm/dd/yyyy');
+  }
 
   return (
     <div
@@ -96,9 +98,11 @@ function App() {
           stroke="url(#colorUv)"
           strokeWidth={3}
           dot={false}
-          activeDot={false}
+          activeDot={true}
         />
-        <XAxis dataKey="datetime" />
+        <XAxis dataKey="datetime"></XAxis>
+        <YAxis><Label value='(USD)' angle={-90}  position='center'/></YAxis>
+        <CartesianGrid strokeDasharray="4 4"/>
         <Tooltip />
       </LineChart>
     </div>
